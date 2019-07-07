@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {ProcessYad2Component} from './popups/process-yad2.component';
-import {MatButtonModule, MatDialogModule, MatSliderModule} from '@angular/material';
+import {MatButtonModule, MatDialogModule, MatSelectModule, MatSliderModule} from '@angular/material';
 import {AngularFireModule} from '@angular/fire';
 import {environment} from '../environments/environment';
 import {HttpClientModule} from '@angular/common/http';
@@ -31,6 +31,7 @@ import {AgmCoreModule} from '@agm/core';
     AngularFirestoreModule,
     AngularFireAuthModule,
       MatSliderModule,
+      MatSelectModule,
     AgmCoreModule.forRoot({
       apiKey: 'AIzaSyAeHuyxXBY6fhmaSclMQ0pU8lWLRpxJUng'
     })

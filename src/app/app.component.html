@@ -26,7 +26,10 @@
                 <ng-container *ngFor="let apartment of (__apartmentsWaitingSliced)">
                     <ng-container *ngIf="apartment.location && apartment.location.coordinates">
                         <ng-container *ngIf="addressesById[apartment.addressId] as address">
-                            <agm-marker [title]="
+                            <agm-marker
+                                    [zIndex]="apartment.general_id==focused_general_id?2000:0"
+                                    [iconUrl]="apartment.general_id==focused_general_id?'https://cdn4.iconfinder.com/data/icons/momenticons-gloss-basic/momenticons-gloss-basic/32/pin-black.png':(apartment.incharge=='omri'?'https://www.gps-data-team.com/poi/icons/Maxol-UK.bmp':(apartment.incharge=='mati'?'https://static.xx.fbcdn.net/images/emoji.php/v9/f9b/1.5/16/1f4a7.png':null))"
+                                    [title]="
                             Math.round(address.durationToWeWorkInSeconds/60) +
                             ' דקות' +
                             '\n' +
@@ -161,6 +164,26 @@
                 </span>
                         </div>
                     </ng-container>
+                    <div>
+                <span class="title">
+                    בטיפול של
+                </span>
+                        <mat-select #me1 [value]="apartment.incharge" (selectionChange)="updateApartment(apartment,me1.value)">
+                            <mat-option>ביחרו</mat-option>
+                            <mat-option value="mati">מתי</mat-option>
+                            <mat-option value="omri">עומרי</mat-option>
+                        </mat-select>
+                        <span>
+                </span>
+                    </div>
+                    <div>
+                <span class="title">
+                    הערות
+                </span>
+                        <span>
+                        <textarea #me2 (change)="updateApartment(apartment,undefined,me2.value)">{{apartment.notes}}</textarea>
+                </span>
+                    </div>
                 </div>
 
 

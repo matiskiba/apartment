@@ -62,18 +62,56 @@ export class AppComponent {
   isNaN: Function = Number.isNaN;
   Math = Math;
 
-  setFocus(general_id)
+  focused_general_id = null;
+  refocusFlag = false;
+
+  setFocus(general_id=null)
   {
-      $("*[general_id]").removeClass("focus");
-      $("*[general_id='"+general_id+"']").addClass("focus").get(0).scrollIntoView(false);
+      if ( general_id === null )
+          general_id = this.focused_general_id;
+      else
+        this.focused_general_id = general_id;
+
+      if ( general_id ) {
+          $("*[general_id]").removeClass("focus");
+          $("*[general_id='" + general_id + "']").addClass("focus").get(0).scrollIntoView(false);
+      }
   }
+
+
+    ngAfterViewChecked() {
+      var self = this;
+      if ( this.refocusFlag ) {
+          setTimeout(function() {
+              self.refocusFlag = false;
+              self.setFocus();
+          },0);
+      }
+    }
+
+
+
+    updateApartment(apartment,incharge=undefined,notes=undefined)
+    {
+        if ( typeof(incharge) != "undefined" )
+            apartment.incharge = incharge;
+        if ( typeof(notes) != "undefined" )
+            apartment.notes = notes;
+
+        console.log(incharge,apartment.general_id);
+
+        var apartmentsDoc = this.db.doc<any>('/apartments/' + apartment.general_id);
+        apartmentsDoc.update(apartment);
+
+        this.refocusFlag = true;
+    }
 
     public getFinalPrice(apartment)
     {
         var price = apartment.price;
         if ( apartment.merchant )
             price = price * ( 1 + 1/12 );
-        return price;
+        return Math.round(price);
     }
 
   doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice) {
