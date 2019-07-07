@@ -32,6 +32,7 @@ export class AppComponent {
 
   public maxWalkingMinutes = 10;
   public maxPrice = 7000;
+  public search = "";
 
   public weWorks = [
       {"name":"Toha","address":"Yigal Alon St 114","latitude":32.0727773,"longitude":34.79492},
@@ -69,8 +70,11 @@ export class AppComponent {
   {
       if ( general_id === null )
           general_id = this.focused_general_id;
-      else
-        this.focused_general_id = general_id;
+      else {
+          if ( this.focused_general_id == general_id)
+              return;
+          this.focused_general_id = general_id;
+      }
 
       if ( general_id ) {
           $("*[general_id]").removeClass("focus");
@@ -114,7 +118,9 @@ export class AppComponent {
         return Math.round(price);
     }
 
-  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice) {
+  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice,search) {
+      var self = this;
+
       var ret = [];
       for ( var i = 0 ; i < apartments.length ; i++ )
       {
@@ -126,14 +132,23 @@ export class AppComponent {
                       var price = this.getFinalPrice(apartments[i]);
                       if ( price <= maxPrice )
                       {
-                          ret.push(apartments[i]);
+                          if ( !search )
+                            ret.push(apartments[i]);
+                          else {
+                              if ( apartments[i].notes && apartments[i].notes.includes(search) )
+                              {
+                                  ret.push(apartments[i]);
+                              }
+                          }
                       }
                   }
               }
           }
       }
 
-      return ret;
+      return ret.sort(function(a,b) {
+          return self.getFinalPrice(a) - self.getFinalPrice(b);
+      });
   }
 
   constructor(public dialog: MatDialog, private http: HttpClient, private db: AngularFirestore) {

@@ -15,7 +15,7 @@
     <button mat-raised-button (click)="openDialog()">get Yad2 JS code</button>
 </div>
 <ng-container *ngIf="(apartmentsWaiting|async) as __apartmentsWaiting">
-<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice)) as __apartmentsWaitingFiltered">
+<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,search)) as __apartmentsWaitingFiltered">
 <ng-container *ngIf="(__apartmentsWaitingFiltered|slice:0:50) as __apartmentsWaitingSliced">
     <div class="content">
         <div class="map">
@@ -65,8 +65,6 @@
                     <span>
                     {{maxWalkingMinutes}}
                     </span>
-                </div>
-                <div>
                     <span>
                         מחיר מקסימלי
                     </span>
@@ -76,6 +74,12 @@
                     <span>
                     {{maxPrice}}
                     </span>
+                </div>
+                <div>
+                    <span>
+                        חיפוש חופשי
+                    </span>
+                    <input matInput [(ngModel)]="search">
                 </div>
             </div>
             <ng-container *ngFor="let apartment of (__apartmentsWaitingSliced)">
