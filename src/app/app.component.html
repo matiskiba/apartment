@@ -1,21 +1,180 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+<div class="buttons">
+    <ng-container *ngIf="(addressesWaiting|async) as __addressesWaiting">
+    <ng-container *ngIf="__addressesWaiting && __addressesWaiting.length > 0">
+        <button mat-raised-button (click)="processAddressesData()">Process addresses data ({{__addressesWaiting.length}})</button>
+    </ng-container>
+    </ng-container>
+    <ng-container *ngIf="(yad2ApartmentsWaiting|async) as __yad2ApartmentsWaiting">
+    <ng-container *ngIf="__yad2ApartmentsWaiting && __yad2ApartmentsWaiting.length > 0">
+        <button mat-raised-button (click)="processYad2ApartmentsData()">Process yad2 apartments data ({{__yad2ApartmentsWaiting.length}})</button>
+    </ng-container>
+    </ng-container>
+    <ng-container *ngIf="(yad2JsonsWaiting|async)?.length > 0">
+        <button mat-raised-button (click)="processYad2JsonData()">Process yad2 json data</button>
+    </ng-container>
+    <button mat-raised-button (click)="openDialog()">get Yad2 JS code</button>
 </div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
+<ng-container *ngIf="(apartmentsWaiting|async) as __apartmentsWaiting">
+<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice)) as __apartmentsWaitingFiltered">
+<ng-container *ngIf="(__apartmentsWaitingFiltered|slice:0:50) as __apartmentsWaitingSliced">
+    <div class="content">
+        <div class="map">
+            <agm-map [latitude]="32.044318" [longitude]="34.759277" [minZoom]="13">
+                <ng-container *ngFor="let wework of weWorks">
+                    <agm-marker iconUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRupy_19i-39YLxk6WCmGF3sL65FjVAC5msNoNKMvKAO4MoTjd0" [latitude]="wework.latitude" [longitude]="wework.longitude" [title]="wework.name" [label]="wework.name" [zIndex]="1000"></agm-marker>
+                </ng-container>
+                <ng-container *ngFor="let apartment of (__apartmentsWaitingSliced)">
+                    <ng-container *ngIf="apartment.location && apartment.location.coordinates">
+                        <ng-container *ngIf="addressesById[apartment.addressId] as address">
+                            <agm-marker [title]="
+                            Math.round(address.durationToWeWorkInSeconds/60) +
+                            ' דקות' +
+                            '\n' +
+                             getFinalPrice(apartment)+apartment.currency"
+                                        (markerClick)="setFocus(apartment.general_id)"
+                                        [markerClickable]="true"
+                                        [latitude]="apartment.location.coordinates.latitude"
+                                        [longitude]="apartment.location.coordinates.longitude"></agm-marker>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+            </agm-map>
+        </div>
+        <div class="apartments">
+            <div class="summary">
+                <div>
+                    מראה
+                    {{__apartmentsWaitingSliced.length}}
+                    דירות (מתוך
+                    {{__apartmentsWaiting.length}}
+                    סה"כ ו
+                    {{__apartmentsWaitingFiltered.length}}
+                    אחרי סינון
+                    )
+                </div>
+                <div>
+                    <span>
+                        מרחק בדקות
+                    </span>
+                    <span>
+                    <mat-slider min="1" max="50" [value]="maxWalkingMinutes" (change)="maxWalkingMinutes=$event.value"></mat-slider>
+                    </span>
+                    <span>
+                    {{maxWalkingMinutes}}
+                    </span>
+                </div>
+                <div>
+                    <span>
+                        מחיר מקסימלי
+                    </span>
+                    <span>
+                    <mat-slider min="1" max="50" [value]="maxPrice" (change)="maxPrice=$event.value"></mat-slider>
+                    </span>
+                    <span>
+                    {{maxPrice}}
+                    </span>
+                </div>
+            </div>
+            <ng-container *ngFor="let apartment of (__apartmentsWaitingSliced)">
+                <div class="apartment" [attr.general_id]="apartment.general_id" (click)="setFocus(apartment.general_id)">
+                    <div>
+                <span class="title">
+                    כתובת
+                </span>
+                        <span>
+                    {{apartment.street}}
+                            {{isNaN(apartment.home_number)?"":apartment.home_number}}
+                </span>
+                    </div>
+                    <div>
+                <span class="title">
+                    כתובת
+                </span>
+                        <span>
+                  {{apartment.neighborhood}}
+                </span>
+                    </div>
+                    <div>
+                <span class="title">
+                    קומה
+                </span>
+                        <span>
+                    {{apartment.floor}}
+                </span>
+                        <span class="title">
+                    חדרים
+                </span>
+                        <span>
+                    {{apartment.rooms}}
+                </span>
+                        <span class="title">
+                    מ"ר
+                </span>
+                        <span>
+                    {{apartment.square_meters}}
+                </span>
+                    </div>
+                    <div>
+                <span class="title">
+                    מחיר
+                </span>
+                        <span>
+                    {{apartment.price}}{{apartment.currency}}
+                            <ng-container *ngIf="apartment.merchant">
+                                (
+                                {{getFinalPrice(apartment)}}{{apartment.currency}}
+                                לאחר עמלת תיווך
+                                )
+                            </ng-container>
+                </span>
+                    </div>
+                    <div *ngIf="apartment.merchant">
+                <span class="title">
+                    תיווך
+                </span>
+                    </div>
+                    <div>
+                        <a target=_blank [href]="apartment.link">
+                            קישור למודעה
+                        </a>
+                        <ng-container *ngIf="apartment.location && apartment.location.coordinates">
+                            <a target=_blank [href]="'https://www.google.com/maps/place/'+apartment.location.coordinates.latitude+','+apartment.location.coordinates.longitude">
+                                קישור למפה
+                            </a>
+                        </ng-container>
+                    </div>
+                    <ng-container *ngIf="addressesById[apartment.addressId] as address">
+                        <div>
+                <span class="title">
+                    מרחק ברגל
+                </span>
+                            <span>
+                    {{address.distanceToWeworkInMeters}}
+                                מטר
+                </span>
+                            <span class="title">
+                    זמן ברגל
+                </span>
+                            <span>
+                                {{Math.round(address.durationToWeWorkInSeconds/60)}}
+                                דקות
+                </span>
+                        </div>
+                    </ng-container>
+                </div>
 
-<router-outlet></router-outlet>
+
+                <!--
+                    {{apartment|json}}
+                    contact_name:string,
+                    location:any,
+                    images:Array<string>,
+                    -->
+
+            </ng-container>
+        </div>
+    </div>
+</ng-container>
+</ng-container>
+</ng-container>
+

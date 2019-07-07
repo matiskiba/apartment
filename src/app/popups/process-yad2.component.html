@@ -1,0 +1,72 @@
+<textarea #raw style="display:none">
+    <script>
+        console.log("loading yad2 data retrieve script");
+    </script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-firestore.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#config-web-app -->
+
+    <script>
+        setTimeout(function() {
+            console.log("init firebase");
+            // Your web app's Firebase configuration
+            var firebaseConfig = {
+                apiKey: "AIzaSyCtE_gnXNYVC_V367vkHZG5KqW_r5nqbHQ",
+                authDomain: "apartments-5437d.firebaseapp.com",
+                databaseURL: "https://apartments-5437d.firebaseio.com",
+                projectId: "apartments-5437d",
+                storageBucket: "apartments-5437d.appspot.com",
+                messagingSenderId: "870793133013",
+                appId: "1:870793133013:web:b93b1bf3ccd97934"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+
+            console.log("reading json data");
+            function readPage(page) {
+                setTimeout(function() {
+                    console.log("reading json data for page",page);
+                    var iframe = $('<iframe src="https://www.yad2.co.il/api/pre-load/getFeedIndex/realestate/rent?city=5000&property=1&rooms=3--1&price=-1-7000&squaremeter=60--1&compact-req=1&page=' + page + '"></iframe>');
+                    $("body").append(iframe);
+                    var interval = setInterval(function() {
+                        var data = iframe.contents().find("body").text().trim();
+                        if ( data )
+                        {
+                            clearInterval(interval);
+                            console.log("finished reading json data for page",page,data.length);
+                            var db = firebase.firestore();
+                            db.collection("yad2_jsons").doc().set({
+                                json:data,
+                                processed:0,
+                                page:page,
+                            })
+                                .then(function() {
+                                    console.log("Document successfully written!",page);
+                                })
+                                .catch(function(error) {
+                                    console.error("Error writing document: ", error,page);
+                                });
+
+                        }
+                    },1000);
+                },page*5000);
+            }
+
+            for ( var _page = 1 ; _page <= 30 ; _page++ )
+            {
+                readPage(_page);
+            }
+        },1000);
+    </script>
+</textarea>
+
+copy js from here
+<textarea>
+    {{processRaw(raw.value)}}
+</textarea>
+<div mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">Done</button>
+</div>
