@@ -103,7 +103,7 @@ export class AppComponent {
 
     var yad2JsonsCollections = this.db.collection('/yad2_jsons',ref => ref.where('processed', '<', 2));
 
-    this.yad2JsonsWaiting = yad2JsonsCollections.valueChanges();
+    this.yad2JsonsWaiting = <any>yad2JsonsCollections.valueChanges();
 
     this.yad2Jsons = yad2JsonsCollections.snapshotChanges();
     this.yad2Jsons.subscribe(function(data:Array<DocumentChangeAction<any>>) {
@@ -123,26 +123,26 @@ export class AppComponent {
 
     var apartmentsCollections = this.db.collection('/apartments',ref => ref.where('processed', '<', 1));
 
-    this.apartmentsWaiting = apartmentsCollections.valueChanges();
+    this.apartmentsWaiting = <any>apartmentsCollections.valueChanges();
 
     this.apartments = apartmentsCollections.snapshotChanges();
-    this.apartments.subscribe(function(data:Array<DocumentChangeAction>) {
+    this.apartments.subscribe(function(data:Array<DocumentChangeAction<any>>) {
       //console.log("data",data[0].payload.doc.id,data[0].payload.doc.data());
       self.currentApartments = data;
     });
 
       var addressesCollections = this.db.collection('/addresses',ref => ref.where('processed', '<', 1));
 
-      this.addressesWaiting = addressesCollections.valueChanges();
+      this.addressesWaiting = <any>addressesCollections.valueChanges();
 
       this.addresses = addressesCollections.snapshotChanges();
-      this.addresses.subscribe(function(data:Array<DocumentChangeAction>) {
+      this.addresses.subscribe(function(data:Array<DocumentChangeAction<any>>) {
           //console.log("data",data[0].payload.doc.id,data[0].payload.doc.data());
           self.currentAddresses = data;
       });
 
       var alladdressesCollections = this.db.collection('/addresses',ref => ref.where('processed', '>=', 1));
-      alladdressesCollections.snapshotChanges().subscribe(function(data:Array<DocumentChangeAction>) {
+      alladdressesCollections.snapshotChanges().subscribe(function(data:Array<DocumentChangeAction<any>>) {
           self.addressesById = {};
 
           for ( var i = 0 ; i < data.length ; i++ ) {
@@ -298,10 +298,10 @@ export class AppComponent {
           var config = self.http.get("https://maps.googleapis.com/maps/api/geocode/json?address="+address+"&key=AIzaSyAeHuyxXBY6fhmaSclMQ0pU8lWLRpxJUng");
           config.subscribe(function(data) {
               //console.log(data);
-              if ( data.status.toLowerCase() == "ok" )
+              if ( (<any>data).status.toLowerCase() == "ok" )
               {
-                  lat = data.results[0].geometry.location.lat;
-                  lng = data.results[0].geometry.location.lng;
+                  lat = (<any>data).results[0].geometry.location.lat;
+                  lng = (<any>data).results[0].geometry.location.lng;
                   doIt();
               }
           });
@@ -372,7 +372,7 @@ export class AppComponent {
 
         var addressId = item.street + "," + item.home_number + "," + item.location.coordinates.latitude + "," + item.location.coordinates.longitude;
 
-        function setAddress(addressId,home_number,street,location) {
+        var setAddress = function(addressId,home_number,street,location){
             var addressesDoc = self.db.doc<any>('/addresses/' + addressId);
             addressesDoc.update({
                 home_number:home_number,
