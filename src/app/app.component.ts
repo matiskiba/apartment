@@ -126,16 +126,20 @@ export class AppComponent {
       for ( var i = 0 ; i < apartments.length ; i++ )
       {
           if ( (new Date().getTime() - apartments[i].update_date ) / 1000 / 3600 / 24 <= lastUpdateDays ) {
-            if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
-              if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
-                if (apartments[i].price && !isNaN(apartments[i].price)) {
-                  var price = this.getFinalPrice(apartments[i]);
-                  if (price <= maxPrice) {
-                    if (!search)
-                      ret.push(apartments[i]);
-                    else {
-                      if (apartments[i].notes && apartments[i].notes.includes(search)) {
+            if ( !apartments[i].neighborhood.includes("קרית שלום") &&
+                  !apartments[i].neighborhood.includes("נוה עופר, תל כביר") &&
+                !apartments[i].neighborhood.includes("ביצרון")) {
+              if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
+                if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
+                  if (apartments[i].price && !isNaN(apartments[i].price)) {
+                    var price = this.getFinalPrice(apartments[i]);
+                    if (price <= maxPrice) {
+                      if (!search)
                         ret.push(apartments[i]);
+                      else {
+                        if (apartments[i].notes && apartments[i].notes.includes(search)) {
+                          ret.push(apartments[i]);
+                        }
                       }
                     }
                   }
