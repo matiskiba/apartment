@@ -15,8 +15,8 @@
     <button mat-raised-button (click)="openDialog()">get Yad2 JS code</button>
 </div>
 <ng-container *ngIf="(apartmentsWaiting|async) as __apartmentsWaiting">
-<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,search)) as __apartmentsWaitingFiltered">
-<ng-container *ngIf="(__apartmentsWaitingFiltered|slice:0:50) as __apartmentsWaitingSliced">
+<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search)) as __apartmentsWaitingFiltered">
+<ng-container *ngIf="(__apartmentsWaitingFiltered|slice:0:200) as __apartmentsWaitingSliced">
     <div class="content">
         <div class="map">
             <agm-map [latitude]="32.044318" [longitude]="34.759277" [minZoom]="13">
@@ -74,6 +74,16 @@
                     <span>
                     {{maxPrice}}
                     </span>
+                  <span>
+                    עדכון אחרון
+                    </span>
+                  <span>
+                    <mat-slider min="1" max="100" [value]="lastUpdateDays" (change)="lastUpdateDays=$event.value"></mat-slider>
+                    </span>
+                  <span>
+                    {{lastUpdateDays}}
+                    </span>
+
                 </div>
                 <div>
                     <span>
@@ -84,6 +94,14 @@
             </div>
             <ng-container *ngFor="let apartment of (__apartmentsWaitingSliced)">
                 <div class="apartment" [attr.general_id]="apartment.general_id" (click)="setFocus(apartment.general_id)">
+                  <div>
+                <span class="title">
+                    מזהה
+                </span>
+                    <span>
+                    {{apartment.easy_id}}
+                    </span>
+                  </div>
                     <div>
                 <span class="title">
                     כתובת
@@ -168,6 +186,14 @@
                 </span>
                         </div>
                     </ng-container>
+                  <div>
+                            <span class="title">
+                    עדכון אחרון
+                </span>
+                    <span>
+                                {{dateFormat(apartment.update_date)}}
+                </span>
+                  </div>
                     <div>
                 <span class="title">
                     בטיפול של

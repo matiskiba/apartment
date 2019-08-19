@@ -32,6 +32,7 @@ export class AppComponent {
 
   public maxWalkingMinutes = 10;
   public maxPrice = 7000;
+  public lastUpdateDays = 30;
   public search = "";
 
   public weWorks = [
@@ -118,31 +119,29 @@ export class AppComponent {
         return Math.round(price);
     }
 
-  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice,search) {
+  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search) {
       var self = this;
 
       var ret = [];
       for ( var i = 0 ; i < apartments.length ; i++ )
       {
-          if ( apartments[i].addressId && addressesById[apartments[i].addressId] )
-          {
-              if ( addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes*60) {
-                  if ( apartments[i].price && !isNaN(apartments[i].price) )
-                  {
-                      var price = this.getFinalPrice(apartments[i]);
-                      if ( price <= maxPrice )
-                      {
-                          if ( !search )
-                            ret.push(apartments[i]);
-                          else {
-                              if ( apartments[i].notes && apartments[i].notes.includes(search) )
-                              {
-                                  ret.push(apartments[i]);
-                              }
-                          }
+          if ( (new Date().getTime() - apartments[i].update_date ) / 1000 / 3600 / 24 <= lastUpdateDays ) {
+            if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
+              if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
+                if (apartments[i].price && !isNaN(apartments[i].price)) {
+                  var price = this.getFinalPrice(apartments[i]);
+                  if (price <= maxPrice) {
+                    if (!search)
+                      ret.push(apartments[i]);
+                    else {
+                      if (apartments[i].notes && apartments[i].notes.includes(search)) {
+                        ret.push(apartments[i]);
                       }
+                    }
                   }
+                }
               }
+            }
           }
       }
 
@@ -154,6 +153,15 @@ export class AppComponent {
   constructor(public dialog: MatDialog, private http: HttpClient, private db: AngularFirestore) {
     var self = this;
 
+    /*
+    setTimeout(function() {
+      self.processAddressesData();
+    },5000);
+    setTimeout(function() {
+      location.reload();
+    },1000*60*5);
+     */
+
     var yad2JsonsCollections = this.db.collection('/yad2_jsons',ref => ref.where('processed', '<', 2));
 
     this.yad2JsonsWaiting = <any>yad2JsonsCollections.valueChanges();
@@ -164,7 +172,7 @@ export class AppComponent {
       self.currentYad2Jsons = data;
     });
 
-    var yad2ApartmentsCollections = this.db.collection('/yad2_apartments',ref => ref.where('processed', '<', 10));
+    var yad2ApartmentsCollections = this.db.collection('/yad2_apartments',ref => ref.where('processed', '<', 17));
 
     this.yad2ApartmentsWaiting = <any>yad2ApartmentsCollections.valueChanges();
 
@@ -178,10 +186,53 @@ export class AppComponent {
 
     this.apartmentsWaiting = <any>apartmentsCollections.valueChanges();
 
+    var done = false;
+
     this.apartments = apartmentsCollections.snapshotChanges();
     this.apartments.subscribe(function(data:Array<DocumentChangeAction<any>>) {
       //console.log("data",data[0].payload.doc.id,data[0].payload.doc.data());
       self.currentApartments = data;
+
+      //console.log("matilog:apartments",data);
+
+      if ( !done )
+      setTimeout(function() {
+        done = true;
+        var aparts = {};
+        for ( var i = 0 ; i < data.length ; i++ ) {
+          var id = data[i].payload.doc.id;
+          var _data = data[i].payload.doc.data();
+
+          aparts[id ] = _data;
+        }
+        var easyId = 0;
+
+        for ( var k in aparts )
+        {
+          var a = aparts[k];
+
+          if ( typeof(a.easy_id) != "undefined" )
+            easyId = Math.max(easyId,a.easy_id);
+        }
+
+        easyId++;
+
+        for ( var k in aparts )
+        {
+          var a = aparts[k];
+
+          if ( typeof(a.easy_id) == "undefined" ) {
+            a.easy_id = easyId++;
+
+            var apartmentsDoc = self.db.doc<any>('/apartments/' + k);
+            apartmentsDoc.set({easy_id:a.easy_id},{merge: true});
+
+            console.log("updated easy_id");
+          }
+        }
+
+      },0);
+
     });
 
       var addressesCollections = this.db.collection('/addresses',ref => ref.where('processed', '<', 1));
@@ -206,7 +257,7 @@ export class AppComponent {
           }
       });
 
-    
+
 
     /*
     function doIt(i)
@@ -229,7 +280,12 @@ export class AppComponent {
         doIt(i);
     }
      */
-    
+
+  }
+
+  dateFormat(ts)
+  {
+    return new Date(ts).toLocaleDateString();
   }
 
     processAddressesData() {
@@ -421,35 +477,40 @@ export class AppComponent {
         merchant:merchant,
         price:price,
         processed:0,
+        update_date:Date.parse(data.date)
       };
 
+      if ( (new Date().getTime() - item.update_date ) / 1000 / 3600 / 24 < 45 ) {
         var addressId = item.street + "," + item.home_number + "," + item.location.coordinates.latitude + "," + item.location.coordinates.longitude;
 
-        var setAddress = function(addressId,home_number,street,location){
-            var addressesDoc = self.db.doc<any>('/addresses/' + addressId);
-            addressesDoc.update({
-                home_number:home_number,
-                street:street,
-                location:location,
-            }).then(function() {
-            }).catch(function(error) {
-                addressesDoc.set({
-                    home_number: home_number,
-                    street: street,
-                    location: location,
-                    processed: 0,
-                });
+        var setAddress = function (addressId, home_number, street, location) {
+          var addressesDoc = self.db.doc<any>('/addresses/' + addressId);
+          console.log("adding",addressId);
+          addressesDoc.update({
+            home_number: home_number,
+            street: street,
+            location: location,
+          }).then(function () {
+          }).catch(function (error) {
+            addressesDoc.set({
+              home_number: home_number,
+              street: street,
+              location: location,
+              processed: 0,
             });
+          });
         }
 
-        setAddress(addressId,home_number,street,Object.assign({}, location));
+        setAddress(addressId, home_number, street, Object.assign({}, location));
 
         item["addressId"] = addressId;
+      }
+
       var apartmentsDoc = this.db.doc<any>('/apartments/' + general_id);
       apartmentsDoc.set(item,{merge: true});
 
       var yad2ApartmentsDoc = this.db.doc<any>('/yad2_apartments/' + id);
-      yad2ApartmentsDoc.update({processed: 10});
+      yad2ApartmentsDoc.update({processed: 17});
       console.log("done with id - ", id);
     }
 

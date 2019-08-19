@@ -30,7 +30,7 @@ webpackEmptyAsyncContext.id = "./$$_lazy_route_resource lazy recursive";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"buttons\">\r\n    <ng-container *ngIf=\"(addressesWaiting|async) as __addressesWaiting\">\r\n    <ng-container *ngIf=\"__addressesWaiting && __addressesWaiting.length > 0\">\r\n        <button mat-raised-button (click)=\"processAddressesData()\">Process addresses data ({{__addressesWaiting.length}})</button>\r\n    </ng-container>\r\n    </ng-container>\r\n    <ng-container *ngIf=\"(yad2ApartmentsWaiting|async) as __yad2ApartmentsWaiting\">\r\n    <ng-container *ngIf=\"__yad2ApartmentsWaiting && __yad2ApartmentsWaiting.length > 0\">\r\n        <button mat-raised-button (click)=\"processYad2ApartmentsData()\">Process yad2 apartments data ({{__yad2ApartmentsWaiting.length}})</button>\r\n    </ng-container>\r\n    </ng-container>\r\n    <ng-container *ngIf=\"(yad2JsonsWaiting|async)?.length > 0\">\r\n        <button mat-raised-button (click)=\"processYad2JsonData()\">Process yad2 json data</button>\r\n    </ng-container>\r\n    <button mat-raised-button (click)=\"openDialog()\">get Yad2 JS code</button>\r\n</div>\r\n<ng-container *ngIf=\"(apartmentsWaiting|async) as __apartmentsWaiting\">\r\n<ng-container *ngIf=\"(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,search)) as __apartmentsWaitingFiltered\">\r\n<ng-container *ngIf=\"(__apartmentsWaitingFiltered|slice:0:50) as __apartmentsWaitingSliced\">\r\n    <div class=\"content\">\r\n        <div class=\"map\">\r\n            <agm-map [latitude]=\"32.044318\" [longitude]=\"34.759277\" [minZoom]=\"13\">\r\n                <ng-container *ngFor=\"let wework of weWorks\">\r\n                    <agm-marker iconUrl=\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRupy_19i-39YLxk6WCmGF3sL65FjVAC5msNoNKMvKAO4MoTjd0\" [latitude]=\"wework.latitude\" [longitude]=\"wework.longitude\" [title]=\"wework.name\" [label]=\"wework.name\" [zIndex]=\"1000\"></agm-marker>\r\n                </ng-container>\r\n                <ng-container *ngFor=\"let apartment of (__apartmentsWaitingSliced)\">\r\n                    <ng-container *ngIf=\"apartment.location && apartment.location.coordinates\">\r\n                        <ng-container *ngIf=\"addressesById[apartment.addressId] as address\">\r\n                            <agm-marker\r\n                                    [zIndex]=\"apartment.general_id==focused_general_id?2000:0\"\r\n                                    [iconUrl]=\"apartment.general_id==focused_general_id?'https://cdn4.iconfinder.com/data/icons/momenticons-gloss-basic/momenticons-gloss-basic/32/pin-black.png':(apartment.incharge=='omri'?'https://www.gps-data-team.com/poi/icons/Maxol-UK.bmp':(apartment.incharge=='mati'?'https://static.xx.fbcdn.net/images/emoji.php/v9/f9b/1.5/16/1f4a7.png':null))\"\r\n                                    [title]=\"\r\n                            Math.round(address.durationToWeWorkInSeconds/60) +\r\n                            ' דקות' +\r\n                            '\\n' +\r\n                             getFinalPrice(apartment)+apartment.currency\"\r\n                                        (markerClick)=\"setFocus(apartment.general_id)\"\r\n                                        [markerClickable]=\"true\"\r\n                                        [latitude]=\"apartment.location.coordinates.latitude\"\r\n                                        [longitude]=\"apartment.location.coordinates.longitude\"></agm-marker>\r\n                        </ng-container>\r\n                    </ng-container>\r\n                </ng-container>\r\n            </agm-map>\r\n        </div>\r\n        <div class=\"apartments\">\r\n            <div class=\"summary\">\r\n                <div>\r\n                    מראה\r\n                    {{__apartmentsWaitingSliced.length}}\r\n                    דירות (מתוך\r\n                    {{__apartmentsWaiting.length}}\r\n                    סה\"כ ו\r\n                    {{__apartmentsWaitingFiltered.length}}\r\n                    אחרי סינון\r\n                    )\r\n                </div>\r\n                <div>\r\n                    <span>\r\n                        מרחק בדקות\r\n                    </span>\r\n                    <span>\r\n                    <mat-slider min=\"1\" max=\"50\" [value]=\"maxWalkingMinutes\" (change)=\"maxWalkingMinutes=$event.value\"></mat-slider>\r\n                    </span>\r\n                    <span>\r\n                    {{maxWalkingMinutes}}\r\n                    </span>\r\n                    <span>\r\n                        מחיר מקסימלי\r\n                    </span>\r\n                    <span>\r\n                    <mat-slider min=\"1\" max=\"50\" [value]=\"maxPrice\" (change)=\"maxPrice=$event.value\"></mat-slider>\r\n                    </span>\r\n                    <span>\r\n                    {{maxPrice}}\r\n                    </span>\r\n                </div>\r\n                <div>\r\n                    <span>\r\n                        חיפוש חופשי\r\n                    </span>\r\n                    <input matInput [(ngModel)]=\"search\">\r\n                </div>\r\n            </div>\r\n            <ng-container *ngFor=\"let apartment of (__apartmentsWaitingSliced)\">\r\n                <div class=\"apartment\" [attr.general_id]=\"apartment.general_id\" (click)=\"setFocus(apartment.general_id)\">\r\n                    <div>\r\n                <span class=\"title\">\r\n                    כתובת\r\n                </span>\r\n                        <span>\r\n                    {{apartment.street}}\r\n                            {{isNaN(apartment.home_number)?\"\":apartment.home_number}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    כתובת\r\n                </span>\r\n                        <span>\r\n                  {{apartment.neighborhood}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    קומה\r\n                </span>\r\n                        <span>\r\n                    {{apartment.floor}}\r\n                </span>\r\n                        <span class=\"title\">\r\n                    חדרים\r\n                </span>\r\n                        <span>\r\n                    {{apartment.rooms}}\r\n                </span>\r\n                        <span class=\"title\">\r\n                    מ\"ר\r\n                </span>\r\n                        <span>\r\n                    {{apartment.square_meters}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    מחיר\r\n                </span>\r\n                        <span>\r\n                    {{apartment.price}}{{apartment.currency}}\r\n                            <ng-container *ngIf=\"apartment.merchant\">\r\n                                (\r\n                                {{getFinalPrice(apartment)}}{{apartment.currency}}\r\n                                לאחר עמלת תיווך\r\n                                )\r\n                            </ng-container>\r\n                </span>\r\n                    </div>\r\n                    <div *ngIf=\"apartment.merchant\">\r\n                <span class=\"title\">\r\n                    תיווך\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                        <a target=_blank [href]=\"apartment.link\">\r\n                            קישור למודעה\r\n                        </a>\r\n                        <ng-container *ngIf=\"apartment.location && apartment.location.coordinates\">\r\n                            <a target=_blank [href]=\"'https://www.google.com/maps/place/'+apartment.location.coordinates.latitude+','+apartment.location.coordinates.longitude\">\r\n                                קישור למפה\r\n                            </a>\r\n                        </ng-container>\r\n                    </div>\r\n                    <ng-container *ngIf=\"addressesById[apartment.addressId] as address\">\r\n                        <div>\r\n                <span class=\"title\">\r\n                    מרחק ברגל\r\n                </span>\r\n                            <span>\r\n                    {{address.distanceToWeworkInMeters}}\r\n                                מטר\r\n                </span>\r\n                            <span class=\"title\">\r\n                    זמן ברגל\r\n                </span>\r\n                            <span>\r\n                                {{Math.round(address.durationToWeWorkInSeconds/60)}}\r\n                                דקות\r\n                </span>\r\n                        </div>\r\n                    </ng-container>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    בטיפול של\r\n                </span>\r\n                        <mat-select #me1 [value]=\"apartment.incharge\" (selectionChange)=\"updateApartment(apartment,me1.value)\">\r\n                            <mat-option>ביחרו</mat-option>\r\n                            <mat-option value=\"mati\">מתי</mat-option>\r\n                            <mat-option value=\"omri\">עומרי</mat-option>\r\n                        </mat-select>\r\n                        <span>\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    הערות\r\n                </span>\r\n                        <span>\r\n                        <textarea #me2 (change)=\"updateApartment(apartment,undefined,me2.value)\">{{apartment.notes}}</textarea>\r\n                </span>\r\n                    </div>\r\n                </div>\r\n\r\n\r\n                <!--\r\n                    {{apartment|json}}\r\n                    contact_name:string,\r\n                    location:any,\r\n                    images:Array<string>,\r\n                    -->\r\n\r\n            </ng-container>\r\n        </div>\r\n    </div>\r\n</ng-container>\r\n</ng-container>\r\n</ng-container>\r\n\r\n"
+module.exports = "<div class=\"buttons\">\r\n    <ng-container *ngIf=\"(addressesWaiting|async) as __addressesWaiting\">\r\n    <ng-container *ngIf=\"__addressesWaiting && __addressesWaiting.length > 0\">\r\n        <button mat-raised-button (click)=\"processAddressesData()\">Process addresses data ({{__addressesWaiting.length}})</button>\r\n    </ng-container>\r\n    </ng-container>\r\n    <ng-container *ngIf=\"(yad2ApartmentsWaiting|async) as __yad2ApartmentsWaiting\">\r\n    <ng-container *ngIf=\"__yad2ApartmentsWaiting && __yad2ApartmentsWaiting.length > 0\">\r\n        <button mat-raised-button (click)=\"processYad2ApartmentsData()\">Process yad2 apartments data ({{__yad2ApartmentsWaiting.length}})</button>\r\n    </ng-container>\r\n    </ng-container>\r\n    <ng-container *ngIf=\"(yad2JsonsWaiting|async)?.length > 0\">\r\n        <button mat-raised-button (click)=\"processYad2JsonData()\">Process yad2 json data</button>\r\n    </ng-container>\r\n    <button mat-raised-button (click)=\"openDialog()\">get Yad2 JS code</button>\r\n</div>\r\n<ng-container *ngIf=\"(apartmentsWaiting|async) as __apartmentsWaiting\">\r\n<ng-container *ngIf=\"(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search)) as __apartmentsWaitingFiltered\">\r\n<ng-container *ngIf=\"(__apartmentsWaitingFiltered|slice:0:200) as __apartmentsWaitingSliced\">\r\n    <div class=\"content\">\r\n        <div class=\"map\">\r\n            <agm-map [latitude]=\"32.044318\" [longitude]=\"34.759277\" [minZoom]=\"13\">\r\n                <ng-container *ngFor=\"let wework of weWorks\">\r\n                    <agm-marker iconUrl=\"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRupy_19i-39YLxk6WCmGF3sL65FjVAC5msNoNKMvKAO4MoTjd0\" [latitude]=\"wework.latitude\" [longitude]=\"wework.longitude\" [title]=\"wework.name\" [label]=\"wework.name\" [zIndex]=\"1000\"></agm-marker>\r\n                </ng-container>\r\n                <ng-container *ngFor=\"let apartment of (__apartmentsWaitingSliced)\">\r\n                    <ng-container *ngIf=\"apartment.location && apartment.location.coordinates\">\r\n                        <ng-container *ngIf=\"addressesById[apartment.addressId] as address\">\r\n                            <agm-marker\r\n                                    [zIndex]=\"apartment.general_id==focused_general_id?2000:0\"\r\n                                    [iconUrl]=\"apartment.general_id==focused_general_id?'https://cdn4.iconfinder.com/data/icons/momenticons-gloss-basic/momenticons-gloss-basic/32/pin-black.png':(apartment.incharge=='omri'?'https://www.gps-data-team.com/poi/icons/Maxol-UK.bmp':(apartment.incharge=='mati'?'https://static.xx.fbcdn.net/images/emoji.php/v9/f9b/1.5/16/1f4a7.png':null))\"\r\n                                    [title]=\"\r\n                            Math.round(address.durationToWeWorkInSeconds/60) +\r\n                            ' דקות' +\r\n                            '\\n' +\r\n                             getFinalPrice(apartment)+apartment.currency\"\r\n                                        (markerClick)=\"setFocus(apartment.general_id)\"\r\n                                        [markerClickable]=\"true\"\r\n                                        [latitude]=\"apartment.location.coordinates.latitude\"\r\n                                        [longitude]=\"apartment.location.coordinates.longitude\"></agm-marker>\r\n                        </ng-container>\r\n                    </ng-container>\r\n                </ng-container>\r\n            </agm-map>\r\n        </div>\r\n        <div class=\"apartments\">\r\n            <div class=\"summary\">\r\n                <div>\r\n                    מראה\r\n                    {{__apartmentsWaitingSliced.length}}\r\n                    דירות (מתוך\r\n                    {{__apartmentsWaiting.length}}\r\n                    סה\"כ ו\r\n                    {{__apartmentsWaitingFiltered.length}}\r\n                    אחרי סינון\r\n                    )\r\n                </div>\r\n                <div>\r\n                    <span>\r\n                        מרחק בדקות\r\n                    </span>\r\n                    <span>\r\n                    <mat-slider min=\"1\" max=\"50\" [value]=\"maxWalkingMinutes\" (change)=\"maxWalkingMinutes=$event.value\"></mat-slider>\r\n                    </span>\r\n                    <span>\r\n                    {{maxWalkingMinutes}}\r\n                    </span>\r\n                    <span>\r\n                        מחיר מקסימלי\r\n                    </span>\r\n                    <span>\r\n                    <mat-slider min=\"1\" max=\"50\" [value]=\"maxPrice\" (change)=\"maxPrice=$event.value\"></mat-slider>\r\n                    </span>\r\n                    <span>\r\n                    {{maxPrice}}\r\n                    </span>\r\n                  <span>\r\n                    עדכון אחרון\r\n                    </span>\r\n                  <span>\r\n                    <mat-slider min=\"1\" max=\"100\" [value]=\"lastUpdateDays\" (change)=\"lastUpdateDays=$event.value\"></mat-slider>\r\n                    </span>\r\n                  <span>\r\n                    {{lastUpdateDays}}\r\n                    </span>\r\n\r\n                </div>\r\n                <div>\r\n                    <span>\r\n                        חיפוש חופשי\r\n                    </span>\r\n                    <input matInput [(ngModel)]=\"search\">\r\n                </div>\r\n            </div>\r\n            <ng-container *ngFor=\"let apartment of (__apartmentsWaitingSliced)\">\r\n                <div class=\"apartment\" [attr.general_id]=\"apartment.general_id\" (click)=\"setFocus(apartment.general_id)\">\r\n                  <div>\r\n                <span class=\"title\">\r\n                    מזהה\r\n                </span>\r\n                    <span>\r\n                    {{apartment.easy_id}}\r\n                    </span>\r\n                  </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    כתובת\r\n                </span>\r\n                        <span>\r\n                    {{apartment.street}}\r\n                            {{isNaN(apartment.home_number)?\"\":apartment.home_number}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    כתובת\r\n                </span>\r\n                        <span>\r\n                  {{apartment.neighborhood}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    קומה\r\n                </span>\r\n                        <span>\r\n                    {{apartment.floor}}\r\n                </span>\r\n                        <span class=\"title\">\r\n                    חדרים\r\n                </span>\r\n                        <span>\r\n                    {{apartment.rooms}}\r\n                </span>\r\n                        <span class=\"title\">\r\n                    מ\"ר\r\n                </span>\r\n                        <span>\r\n                    {{apartment.square_meters}}\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    מחיר\r\n                </span>\r\n                        <span>\r\n                    {{apartment.price}}{{apartment.currency}}\r\n                            <ng-container *ngIf=\"apartment.merchant\">\r\n                                (\r\n                                {{getFinalPrice(apartment)}}{{apartment.currency}}\r\n                                לאחר עמלת תיווך\r\n                                )\r\n                            </ng-container>\r\n                </span>\r\n                    </div>\r\n                    <div *ngIf=\"apartment.merchant\">\r\n                <span class=\"title\">\r\n                    תיווך\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                        <a target=_blank [href]=\"apartment.link\">\r\n                            קישור למודעה\r\n                        </a>\r\n                        <ng-container *ngIf=\"apartment.location && apartment.location.coordinates\">\r\n                            <a target=_blank [href]=\"'https://www.google.com/maps/place/'+apartment.location.coordinates.latitude+','+apartment.location.coordinates.longitude\">\r\n                                קישור למפה\r\n                            </a>\r\n                        </ng-container>\r\n                    </div>\r\n                    <ng-container *ngIf=\"addressesById[apartment.addressId] as address\">\r\n                        <div>\r\n                <span class=\"title\">\r\n                    מרחק ברגל\r\n                </span>\r\n                            <span>\r\n                    {{address.distanceToWeworkInMeters}}\r\n                                מטר\r\n                </span>\r\n                            <span class=\"title\">\r\n                    זמן ברגל\r\n                </span>\r\n                            <span>\r\n                                {{Math.round(address.durationToWeWorkInSeconds/60)}}\r\n                                דקות\r\n                </span>\r\n                        </div>\r\n                    </ng-container>\r\n                  <div>\r\n                            <span class=\"title\">\r\n                    עדכון אחרון\r\n                </span>\r\n                    <span>\r\n                                {{dateFormat(apartment.update_date)}}\r\n                </span>\r\n                  </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    בטיפול של\r\n                </span>\r\n                        <mat-select #me1 [value]=\"apartment.incharge\" (selectionChange)=\"updateApartment(apartment,me1.value)\">\r\n                            <mat-option>ביחרו</mat-option>\r\n                            <mat-option value=\"mati\">מתי</mat-option>\r\n                            <mat-option value=\"omri\">עומרי</mat-option>\r\n                        </mat-select>\r\n                        <span>\r\n                </span>\r\n                    </div>\r\n                    <div>\r\n                <span class=\"title\">\r\n                    הערות\r\n                </span>\r\n                        <span>\r\n                        <textarea #me2 (change)=\"updateApartment(apartment,undefined,me2.value)\">{{apartment.notes}}</textarea>\r\n                </span>\r\n                    </div>\r\n                </div>\r\n\r\n\r\n                <!--\r\n                    {{apartment|json}}\r\n                    contact_name:string,\r\n                    location:any,\r\n                    images:Array<string>,\r\n                    -->\r\n\r\n            </ng-container>\r\n        </div>\r\n    </div>\r\n</ng-container>\r\n</ng-container>\r\n</ng-container>\r\n\r\n"
 
 /***/ }),
 
@@ -127,6 +127,7 @@ var AppComponent = /** @class */ (function () {
         this.title = 'apartment';
         this.maxWalkingMinutes = 10;
         this.maxPrice = 7000;
+        this.lastUpdateDays = 30;
         this.search = "";
         this.weWorks = [
             { "name": "Toha", "address": "Yigal Alon St 114", "latitude": 32.0727773, "longitude": 34.79492 },
@@ -147,6 +148,14 @@ var AppComponent = /** @class */ (function () {
         this.focused_general_id = null;
         this.refocusFlag = false;
         var self = this;
+        /*
+        setTimeout(function() {
+          self.processAddressesData();
+        },5000);
+        setTimeout(function() {
+          location.reload();
+        },1000*60*5);
+         */
         var yad2JsonsCollections = this.db.collection('/yad2_jsons', function (ref) { return ref.where('processed', '<', 2); });
         this.yad2JsonsWaiting = yad2JsonsCollections.valueChanges();
         this.yad2Jsons = yad2JsonsCollections.snapshotChanges();
@@ -154,7 +163,7 @@ var AppComponent = /** @class */ (function () {
             //console.log("data",data[0].payload.doc.id,data[0].payload.doc.data());
             self.currentYad2Jsons = data;
         });
-        var yad2ApartmentsCollections = this.db.collection('/yad2_apartments', function (ref) { return ref.where('processed', '<', 10); });
+        var yad2ApartmentsCollections = this.db.collection('/yad2_apartments', function (ref) { return ref.where('processed', '<', 17); });
         this.yad2ApartmentsWaiting = yad2ApartmentsCollections.valueChanges();
         this.yad2Apartments = yad2ApartmentsCollections.snapshotChanges();
         this.yad2Apartments.subscribe(function (data) {
@@ -163,10 +172,38 @@ var AppComponent = /** @class */ (function () {
         });
         var apartmentsCollections = this.db.collection('/apartments', function (ref) { return ref.where('processed', '<', 1); });
         this.apartmentsWaiting = apartmentsCollections.valueChanges();
+        var done = false;
         this.apartments = apartmentsCollections.snapshotChanges();
         this.apartments.subscribe(function (data) {
             //console.log("data",data[0].payload.doc.id,data[0].payload.doc.data());
             self.currentApartments = data;
+            //console.log("matilog:apartments",data);
+            if (!done)
+                setTimeout(function () {
+                    done = true;
+                    var aparts = {};
+                    for (var i = 0; i < data.length; i++) {
+                        var id = data[i].payload.doc.id;
+                        var _data = data[i].payload.doc.data();
+                        aparts[id] = _data;
+                    }
+                    var easyId = 0;
+                    for (var k in aparts) {
+                        var a = aparts[k];
+                        if (typeof (a.easy_id) != "undefined")
+                            easyId = Math.max(easyId, a.easy_id);
+                    }
+                    easyId++;
+                    for (var k in aparts) {
+                        var a = aparts[k];
+                        if (typeof (a.easy_id) == "undefined") {
+                            a.easy_id = easyId++;
+                            var apartmentsDoc = self.db.doc('/apartments/' + k);
+                            apartmentsDoc.set({ easy_id: a.easy_id }, { merge: true });
+                            console.log("updated easy_id");
+                        }
+                    }
+                }, 0);
         });
         var addressesCollections = this.db.collection('/addresses', function (ref) { return ref.where('processed', '<', 1); });
         this.addressesWaiting = addressesCollections.valueChanges();
@@ -247,20 +284,22 @@ var AppComponent = /** @class */ (function () {
             price = price * (1 + 1 / 12);
         return Math.round(price);
     };
-    AppComponent.prototype.doApartmentsFilter = function (apartments, addressesById, maxWalkingMinutes, maxPrice, search) {
+    AppComponent.prototype.doApartmentsFilter = function (apartments, addressesById, maxWalkingMinutes, maxPrice, lastUpdateDays, search) {
         var self = this;
         var ret = [];
         for (var i = 0; i < apartments.length; i++) {
-            if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
-                if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
-                    if (apartments[i].price && !isNaN(apartments[i].price)) {
-                        var price = this.getFinalPrice(apartments[i]);
-                        if (price <= maxPrice) {
-                            if (!search)
-                                ret.push(apartments[i]);
-                            else {
-                                if (apartments[i].notes && apartments[i].notes.includes(search)) {
+            if ((new Date().getTime() - apartments[i].update_date) / 1000 / 3600 / 24 <= lastUpdateDays) {
+                if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
+                    if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
+                        if (apartments[i].price && !isNaN(apartments[i].price)) {
+                            var price = this.getFinalPrice(apartments[i]);
+                            if (price <= maxPrice) {
+                                if (!search)
                                     ret.push(apartments[i]);
+                                else {
+                                    if (apartments[i].notes && apartments[i].notes.includes(search)) {
+                                        ret.push(apartments[i]);
+                                    }
                                 }
                             }
                         }
@@ -271,6 +310,9 @@ var AppComponent = /** @class */ (function () {
         return ret.sort(function (a, b) {
             return self.getFinalPrice(a) - self.getFinalPrice(b);
         });
+    };
+    AppComponent.prototype.dateFormat = function (ts) {
+        return new Date(ts).toLocaleDateString();
     };
     AppComponent.prototype.processAddressesData = function () {
         var self = this;
@@ -424,30 +466,34 @@ var AppComponent = /** @class */ (function () {
                 merchant: merchant,
                 price: price,
                 processed: 0,
+                update_date: Date.parse(data.date)
             };
-            var addressId = item.street + "," + item.home_number + "," + item.location.coordinates.latitude + "," + item.location.coordinates.longitude;
-            var setAddress = function (addressId, home_number, street, location) {
-                var addressesDoc = self.db.doc('/addresses/' + addressId);
-                addressesDoc.update({
-                    home_number: home_number,
-                    street: street,
-                    location: location,
-                }).then(function () {
-                }).catch(function (error) {
-                    addressesDoc.set({
+            if ((new Date().getTime() - item.update_date) / 1000 / 3600 / 24 < 45) {
+                var addressId = item.street + "," + item.home_number + "," + item.location.coordinates.latitude + "," + item.location.coordinates.longitude;
+                var setAddress = function (addressId, home_number, street, location) {
+                    var addressesDoc = self.db.doc('/addresses/' + addressId);
+                    console.log("adding", addressId);
+                    addressesDoc.update({
                         home_number: home_number,
                         street: street,
                         location: location,
-                        processed: 0,
+                    }).then(function () {
+                    }).catch(function (error) {
+                        addressesDoc.set({
+                            home_number: home_number,
+                            street: street,
+                            location: location,
+                            processed: 0,
+                        });
                     });
-                });
-            };
-            setAddress(addressId, home_number, street, Object.assign({}, location));
-            item["addressId"] = addressId;
+                };
+                setAddress(addressId, home_number, street, Object.assign({}, location));
+                item["addressId"] = addressId;
+            }
             var apartmentsDoc = this.db.doc('/apartments/' + general_id);
             apartmentsDoc.set(item, { merge: true });
             var yad2ApartmentsDoc = this.db.doc('/yad2_apartments/' + id);
-            yad2ApartmentsDoc.update({ processed: 10 });
+            yad2ApartmentsDoc.update({ processed: 17 });
             console.log("done with id - ", id);
         }
     };
