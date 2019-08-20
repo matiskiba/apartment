@@ -35,11 +35,14 @@ export class AppComponent {
   public lastUpdateDays = 30;
   public search = "";
 
+  public handledBy = "";
+
+  public updateOnly = false;
+
   public weWorks = [
       {"name":"Toha","address":"Yigal Alon St 114","latitude":32.0727773,"longitude":34.79492},
       {"name":"Shoken","address":"23 Shoken St","latitude":32.0515688,"longitude":34.7723244},
       {"name":"HaZerem","address":"7 HaPelech Street","latitude":32.0503025,"longitude":34.7666856},
-      {"name":"London Ministore","address":"30 Ibn Gabirol","latitude":32.0907315,"longitude":34.8300521},
       {"name":"Dubnov","address":"7 Dubnov","latitude":32.074925,"longitude":34.783161},
       {"name":"Menachem Begin","address":"Derech Menachem Begin 144","latitude":32.0769741,"longitude":34.7923559},
       {"name":"Sarona","address":"3 Aluf Kalman Magen","latitude":32.0713993,"longitude":34.7865759}];
@@ -119,7 +122,7 @@ export class AppComponent {
         return Math.round(price);
     }
 
-  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search) {
+  doApartmentsFilter(apartments,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search,handledBy) {
       var self = this;
 
       var ret = [];
@@ -129,16 +132,45 @@ export class AppComponent {
             if ( !apartments[i].neighborhood.includes("קרית שלום") &&
                   !apartments[i].neighborhood.includes("נוה עופר, תל כביר") &&
                 !apartments[i].neighborhood.includes("ביצרון")) {
-              if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
-                if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
-                  if (apartments[i].price && !isNaN(apartments[i].price)) {
-                    var price = this.getFinalPrice(apartments[i]);
-                    if (price <= maxPrice) {
-                      if (!search)
-                        ret.push(apartments[i]);
-                      else {
-                        if (apartments[i].notes && apartments[i].notes.includes(search)) {
+              if ( !apartments[i].notes || !apartments[i].notes.includes("לא רלוונטי") )
+              {
+                if (apartments[i].addressId && addressesById[apartments[i].addressId]) {
+                  if (addressesById[apartments[i].addressId].durationToWeWorkInSeconds < maxWalkingMinutes * 60) {
+                    if (apartments[i].price && !isNaN(apartments[i].price)) {
+                      var incharge = apartments[i].incharge;
+                      var flag = true;
+                      switch (handledBy) {
+                        case "onlyMati":
+                          if (!incharge || incharge == "omri")
+                            flag = false;
+                          break;
+                        case "onlyOmri":
+                          if (!incharge || incharge == "mati")
+                            flag = false;
+                          break;
+                        case "notMati":
+                          if (incharge == "mati")
+                            flag = false;
+                          break;
+                        case "notOmri":
+                          if (incharge == "omri")
+                            flag = false;
+                          break;
+                        case "notAnyone":
+                          if (incharge)
+                            flag = false;
+                          break;
+                      }
+                      if (!flag)
+                        continue;
+                      var price = this.getFinalPrice(apartments[i]);
+                      if (price <= maxPrice) {
+                        if (!search)
                           ret.push(apartments[i]);
+                        else {
+                          if (apartments[i].notes && apartments[i].notes.includes(search)) {
+                            ret.push(apartments[i]);
+                          }
                         }
                       }
                     }
@@ -154,10 +186,27 @@ export class AppComponent {
       });
   }
 
+  getStats(apartments) {
+    var today = Date.parse(new Date().toDateString());
+    var byDayDiff = [];
+    for ( var i = 0 ; i < 30 ; i++ )
+      byDayDiff[i] = 0;
+    for ( var i = 0 ; i < apartments.length ; i++ )
+    {
+      var dayDiff = today - Date.parse(new Date(apartments[i].create_date).toDateString());
+      dayDiff = dayDiff / 1000 / 3600 / 24;
+      if (dayDiff < byDayDiff.length)
+        byDayDiff[dayDiff]++;
+    }
+    console.log("stats",byDayDiff);
+    return [];
+  }
+
   constructor(public dialog: MatDialog, private http: HttpClient, private db: AngularFirestore) {
     var self = this;
 
     /*
+    self.updateOnly = true;
     setTimeout(function() {
       self.processAddressesData();
     },5000);
@@ -176,7 +225,7 @@ export class AppComponent {
       self.currentYad2Jsons = data;
     });
 
-    var yad2ApartmentsCollections = this.db.collection('/yad2_apartments',ref => ref.where('processed', '<', 17));
+    var yad2ApartmentsCollections = this.db.collection('/yad2_apartments',ref => ref.where('processed', '<', 18));
 
     this.yad2ApartmentsWaiting = <any>yad2ApartmentsCollections.valueChanges();
 
@@ -481,7 +530,8 @@ export class AppComponent {
         merchant:merchant,
         price:price,
         processed:0,
-        update_date:Date.parse(data.date)
+        update_date:Date.parse(data.date),
+        create_date:Date.parse(data.date_added)
       };
 
       if ( (new Date().getTime() - item.update_date ) / 1000 / 3600 / 24 < 45 ) {
@@ -514,7 +564,7 @@ export class AppComponent {
       apartmentsDoc.set(item,{merge: true});
 
       var yad2ApartmentsDoc = this.db.doc<any>('/yad2_apartments/' + id);
-      yad2ApartmentsDoc.update({processed: 17});
+      yad2ApartmentsDoc.update({processed: 18});
       console.log("done with id - ", id);
     }
 

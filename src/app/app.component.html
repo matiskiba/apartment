@@ -13,9 +13,18 @@
         <button mat-raised-button (click)="processYad2JsonData()">Process yad2 json data</button>
     </ng-container>
     <button mat-raised-button (click)="openDialog()">get Yad2 JS code</button>
+  <button mat-raised-button (click)="updateOnly=!updateOnly">update only mode</button>
 </div>
+<ng-container *ngIf="!updateOnly">
 <ng-container *ngIf="(apartmentsWaiting|async) as __apartmentsWaiting">
-<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search)) as __apartmentsWaitingFiltered">
+<ng-container *ngIf="(doApartmentsFilter(__apartmentsWaiting,addressesById,maxWalkingMinutes,maxPrice,lastUpdateDays,search,handledBy)) as __apartmentsWaitingFiltered">
+  <!--
+  <div>
+    <table>
+      {{getStats(__apartmentsWaitingFiltered).length}}
+    </table>
+  </div>
+  -->
 <ng-container *ngIf="(__apartmentsWaitingFiltered|slice:0:200) as __apartmentsWaitingSliced">
     <div class="content">
         <div class="map">
@@ -83,7 +92,18 @@
                   <span>
                     {{lastUpdateDays}}
                     </span>
-
+                    <mat-form-field>
+                      <mat-label>בטיפול של</mat-label>
+                      <mat-select [(value)]="handledBy">
+                        <mat-option>None</mat-option>
+                        <mat-option value="">כל הדירות</mat-option>
+                        <mat-option value="onlyMati">רק מתי</mat-option>
+                        <mat-option value="onlyOmri">רק עומרי</mat-option>
+                        <mat-option value="notOmri">לא בטיפול עומרי</mat-option>
+                        <mat-option value="notMati">לא בטיפול מתי</mat-option>
+                        <mat-option value="notAnyone">לא בטיפול אף אחד</mat-option>
+                      </mat-select>
+                    </mat-form-field>
                 </div>
                 <div>
                     <span>
@@ -230,4 +250,4 @@
 </ng-container>
 </ng-container>
 </ng-container>
-
+</ng-container>
